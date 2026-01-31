@@ -1,5 +1,5 @@
 import { Clock, Calendar, Smile, FileText } from 'lucide-svelte';
-import { formatDate } from '$lib/utils/format.js';
+import { formatDate, formatHours } from '$lib/utils/format.js';
 
 export type WorkLogType = 'work' | 'vacation' | 'sick_leave' | 'permit';
 
@@ -22,6 +22,9 @@ export class WorkLog {
     user_id: string;
     position_id: string;
     date: string;
+    check_in: string | null;
+    check_out: string | null;
+    break_minutes: number;
     hours_worked: number;
     type: WorkLogType;
     notes: string | null;
@@ -33,16 +36,35 @@ export class WorkLog {
         this.user_id = workLog.user_id;
         this.position_id = workLog.position_id;
         this.date = workLog.date;
-        this.hours_worked = workLog.hours_worked || 0;
+        this.check_in = workLog.check_in;
+        this.check_out = workLog.check_out;
+        this.break_minutes = workLog.break_minutes || 0;
+        // Calculate hours_worked from check_in/check_out if available, otherwise use stored value
+        this.hours_worked = workLog.hours_worked || this.calculateHoursWorked();
         this.type = workLog.type || 'work';
         this.notes = workLog.notes;
         this.mood_rating = workLog.mood_rating;
         this.created_at = workLog.created_at;
     }
 
+    public calculateHoursWorked(): number {
+        if (!this.check_in || !this.check_out) return 0;
+        
+        const [inHours, inMinutes] = this.check_in.split(':').map(Number);
+        const [outHours, outMinutes] = this.check_out.split(':').map(Number);
+        
+        const totalMinutes = (outHours * 60 + outMinutes) - (inHours * 60 + inMinutes) - this.break_minutes;
+        return Math.max(0, totalMinutes / 60);
+    }
+
     public getMoodEmoji(): string {
         const moods = ['😢', '😕', '😐', '🙂', '😄'];
         return this.mood_rating ? moods[this.mood_rating - 1] : '—';
+    }
+
+    public getTimeRange(): string {
+        if (!this.check_in || !this.check_out) return '—';
+        return `${this.check_in} - ${this.check_out}`;
     }
 
     public static dataColumns: any[] = [
@@ -58,7 +80,7 @@ export class WorkLog {
             key: 'hours_worked',
             sortable: true,
             icon: Clock,
-            display: (log: WorkLog) => `${log.hours_worked}h`
+            display: (log: WorkLog) => formatHours(log.hours_worked)
         },
         {
             label: 'Type',

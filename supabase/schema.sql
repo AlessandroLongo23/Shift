@@ -61,7 +61,10 @@ CREATE TABLE work_logs (
     user_id UUID REFERENCES auth.users NOT NULL,
     position_id UUID REFERENCES positions(id) ON DELETE CASCADE NOT NULL,
     date DATE NOT NULL,
-    hours_worked NUMERIC DEFAULT 0,
+    check_in TIME, -- Check-in time (e.g., '09:00')
+    check_out TIME, -- Check-out time (e.g., '18:00')
+    break_minutes INTEGER DEFAULT 0, -- Break duration in minutes
+    hours_worked NUMERIC DEFAULT 0, -- Calculated from check_in/check_out minus break
     type TEXT CHECK (type IN ('work', 'vacation', 'sick_leave', 'permit')),
     notes TEXT,
     mood_rating INTEGER CHECK (mood_rating BETWEEN 1 AND 5),

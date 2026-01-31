@@ -7,11 +7,13 @@
         Calendar, 
         TrendingUp, 
         Building2,
+        Settings,
         LogOut,
         Menu,
         X,
         ChevronRight
     } from 'lucide-svelte';
+    import ThemeToggle from '$lib/components/theme/ThemeToggle.svelte';
 
     let { children, data } = $props();
 
@@ -21,7 +23,8 @@
         { name: 'Timeline', href: '/app/timeline', icon: Clock },
         { name: 'Workspace', href: '/app/workspace', icon: Calendar },
         { name: 'Analytics', href: '/app/analytics', icon: TrendingUp },
-        { name: 'Companies', href: '/app/companies', icon: Building2 }
+        { name: 'Companies', href: '/app/companies', icon: Building2 },
+        { name: 'Settings', href: '/app/settings', icon: Settings }
     ];
 
     function isActive(href) {
@@ -55,13 +58,13 @@
     <!-- Sidebar -->
     <aside class="
         fixed lg:static inset-y-0 left-0 z-50
-        w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800
+        w-64 bg-white dark:bg-zinc-900 border-r border-zinc-500/25
         transform transition-transform duration-200 ease-in-out
         {isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
     ">
         <div class="flex flex-col h-full">
             <!-- Logo -->
-            <div class="flex items-center gap-3 px-6 h-16 border-b border-zinc-200 dark:border-zinc-800">
+            <div class="flex items-center gap-3 px-6 h-16 border-b border-zinc-500/25">
                 <div class="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">
                     <Briefcase class="w-4 h-4 text-white dark:text-zinc-900" />
                 </div>
@@ -90,7 +93,7 @@
             </nav>
 
             <!-- User section -->
-            <div class="px-4 py-4 border-t border-zinc-200 dark:border-zinc-800">
+            <div class="px-4 py-4 border-t border-zinc-500/25">
                 <div class="flex items-center gap-3 px-3 py-2 mb-2">
                     <div class="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-sm font-medium">
                         {data.user?.email?.[0]?.toUpperCase() || 'U'}
@@ -98,6 +101,7 @@
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium truncate">{data.user?.email || 'User'}</p>
                     </div>
+                    <ThemeToggle />
                 </div>
                 <button
                     onclick={handleLogout}
@@ -113,21 +117,24 @@
     <!-- Main content -->
     <div class="flex-1 flex flex-col min-w-0">
         <!-- Mobile header -->
-        <header class="lg:hidden sticky top-0 z-30 flex items-center gap-4 px-4 h-16 bg-zinc-50 dark:bg-zinc-925 border-b border-zinc-200 dark:border-zinc-800">
-            <button
-                type="button"
-                onclick={() => isSidebarOpen = true}
-                class="p-2 -ml-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                aria-label="Open sidebar"
-            >
-                <Menu class="w-5 h-5" />
-            </button>
-            <div class="flex items-center gap-2">
-                <div class="w-6 h-6 rounded bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">
-                    <Briefcase class="w-3 h-3 text-white dark:text-zinc-900" />
+        <header class="lg:hidden sticky top-0 z-30 flex items-center justify-between px-4 h-16 bg-zinc-50 dark:bg-zinc-925 border-b border-zinc-500/25">
+            <div class="flex items-center gap-4">
+                <button
+                    type="button"
+                    onclick={() => isSidebarOpen = true}
+                    class="p-2 -ml-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    aria-label="Open sidebar"
+                >
+                    <Menu class="w-5 h-5" />
+                </button>
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">
+                        <Briefcase class="w-3 h-3 text-white dark:text-zinc-900" />
+                    </div>
+                    <span class="font-semibold">Shift</span>
                 </div>
-                <span class="font-semibold">Shift</span>
             </div>
+            <ThemeToggle />
         </header>
 
         <!-- Page content -->

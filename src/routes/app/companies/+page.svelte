@@ -55,7 +55,7 @@
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-zinc-100"></div>
         </div>
     {:else if companiesStore.companies.length === 0}
-        <div class="text-center py-12 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
+        <div class="text-center py-12 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25">
             <Building2 class="w-12 h-12 mx-auto text-zinc-400 mb-4" />
             <h3 class="text-lg font-medium mb-2">No companies yet</h3>
             <p class="text-zinc-600 dark:text-zinc-400 mb-4">Add companies to organize your positions</p>
@@ -70,7 +70,7 @@
                 <button
                     type="button"
                     onclick={() => handleEditCompany(company)}
-                    class="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors text-left"
+                    class="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25 hover:border-zinc-500/40 transition-colors text-left"
                 >
                     <div class="flex items-start gap-4">
                         <!-- Company Logo/Color -->
@@ -108,7 +108,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2 text-sm text-zinc-500">
+                    <div class="mt-4 pt-4 border-t border-zinc-500/25 flex items-center gap-2 text-sm text-zinc-500">
                         <Briefcase class="w-4 h-4" />
                         <span>{getPositionCount(company.id)} position{getPositionCount(company.id) !== 1 ? 's' : ''}</span>
                     </div>

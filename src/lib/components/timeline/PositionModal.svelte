@@ -1,5 +1,6 @@
 <script>
     import { positionsStore } from '$lib/stores/positions.svelte.js';
+    import { currencyList } from '$lib/stores/currency.js';
     import Modal from '$lib/components/ui/Modal.svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import Input from '$lib/components/ui/Input.svelte';
@@ -120,7 +121,7 @@
                 id="company"
                 bind:value={form.company_id}
                 required
-                class="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                class="w-full px-3 py-2 rounded-lg border border-zinc-500/25 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
             >
                 <option value="">Select a company</option>
                 {#each companies as company}
@@ -143,7 +144,7 @@
             <select
                 id="contract_type"
                 bind:value={form.contract_type}
-                class="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                class="w-full px-3 py-2 rounded-lg border border-zinc-500/25 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
             >
                 <option value="full-time">Full-time</option>
                 <option value="part-time">Part-time</option>
@@ -180,11 +181,11 @@
                 <select
                     id="currency"
                     bind:value={form.currency}
-                    class="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                    class="w-full px-3 py-2 rounded-lg border border-zinc-500/25 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
                 >
-                    <option value="EUR">EUR</option>
-                    <option value="USD">USD</option>
-                    <option value="GBP">GBP</option>
+                    {#each currencyList as currency}
+                        <option value={currency.code}>{currency.code} ({currency.symbol})</option>
+                    {/each}
                 </select>
             </div>
         </div>
@@ -204,7 +205,7 @@
                 bind:value={form.description}
                 placeholder="Job description and responsibilities..."
                 rows="3"
-                class="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                class="w-full px-3 py-2 rounded-lg border border-zinc-500/25 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500"
             ></textarea>
         </div>
 

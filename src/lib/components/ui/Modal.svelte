@@ -49,7 +49,7 @@
         >
             <!-- Header -->
             {#if title}
-                <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-500/25">
                     <h2 class="text-lg font-semibold">{title}</h2>
                     <button 
                         type="button"

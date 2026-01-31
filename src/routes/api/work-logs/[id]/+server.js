@@ -34,6 +34,9 @@ export async function PUT({ params, request, locals: { supabase } }) {
             .update({
                 position_id: workLog.position_id,
                 date: workLog.date,
+                check_in: workLog.check_in,
+                check_out: workLog.check_out,
+                break_minutes: workLog.break_minutes,
                 hours_worked: workLog.hours_worked,
                 type: workLog.type,
                 notes: workLog.notes,

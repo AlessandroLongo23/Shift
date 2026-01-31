@@ -15,7 +15,7 @@
     const variantClasses = {
         primary: 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 focus:ring-zinc-500',
         secondary: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 focus:ring-zinc-400',
-        outline: 'border border-zinc-300 dark:border-zinc-700 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800 focus:ring-zinc-400',
+        outline: 'border border-zinc-500/25 bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:ring-zinc-400',
         ghost: 'bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:ring-zinc-400',
         danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
         success: 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500'

@@ -3,13 +3,13 @@
     import { Briefcase, Calendar, TrendingUp, Clock, Shield, Zap, ChevronRight } from 'lucide-svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import AuthModal from '$lib/components/auth/AuthModal.svelte';
+    import ThemeToggle from '$lib/components/theme/ThemeToggle.svelte';
 
     let { data } = $props();
     let { session } = $derived(data);
 
     let isAuthModalOpen = $state(false);
 
-    // Redirect to app if already logged in
     $effect(() => {
         if (session) {
             goto('/app/timeline');
@@ -58,7 +58,7 @@
 <AuthModal bind:isOpen={isAuthModalOpen} />
 
 <!-- Header -->
-<header class="fixed top-0 left-0 right-0 z-40 bg-zinc-50/80 dark:bg-zinc-925/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
+<header class="fixed top-0 left-0 right-0 z-40 bg-zinc-50/80 dark:bg-zinc-925/80 backdrop-blur-md border-b border-zinc-500/25">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <div class="flex items-center gap-2">
@@ -68,9 +68,12 @@
                 <span class="text-xl font-bold">Shift</span>
             </div>
 
-            <Button onclick={() => isAuthModalOpen = true}>
-                Sign In
-            </Button>
+            <div class="flex items-center gap-3">
+                <ThemeToggle />
+                <Button onclick={() => isAuthModalOpen = true}>
+                    Sign In
+                </Button>
+            </div>
         </div>
     </div>
 </header>
@@ -111,7 +114,7 @@
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {#each features as feature}
-                <div class="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+                <div class="p-6 rounded-xl border border-zinc-500/25 hover:border-zinc-500/40 transition-colors bg-zinc-50 dark:bg-zinc-800/50">
                     <div class="w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-4">
                         <feature.icon class="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                     </div>
@@ -156,7 +159,7 @@
 </section>
 
 <!-- Footer -->
-<footer class="py-8 px-4 sm:px-6 lg:px-8 border-t border-zinc-200 dark:border-zinc-800">
+<footer class="py-8 px-4 sm:px-6 lg:px-8 border-t border-zinc-500/25">
     <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2">
             <div class="w-6 h-6 rounded bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">

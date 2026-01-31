@@ -43,7 +43,7 @@ export class Position {
     }
 
     public isCurrent(): boolean {
-        return this.end_date === null;
+        return this.end_date === null || this.end_date === undefined || this.end_date === '';
     }
 
     public getDurationMonths(): number {
