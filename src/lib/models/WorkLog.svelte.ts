@@ -1,7 +1,7 @@
 import { Clock, Calendar, Smile, FileText } from 'lucide-svelte';
 import { formatDate, formatHours } from '$lib/utils/format.js';
 import { moodsOptions } from '$lib/const/moods';
-import { WorkLogType, WorkLogTypeColors, WorkLogTypeMap, workLogTypeOptions } from '$lib/const/workLogTypes';
+import { WorkLogType, WorkLogTypeColors, WorkLogTypeMap } from '$lib/const/workLogTypes';
 
 export class WorkLog {
     id: string;

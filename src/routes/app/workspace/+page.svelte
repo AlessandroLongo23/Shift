@@ -8,7 +8,7 @@
     import { exchangeRates, fetchExchangeRates, convertCurrency } from '$lib/stores/exchangeRates.js';
     import { formatCurrency, formatHours, formatTime } from '$lib/utils/format.js';
     import { getPayPeriod, getPeriodStats, formatPayPeriod } from '$lib/utils/period.js';
-    import { WorkLogTypeColors, WorkLogTypeMap } from '$lib/models/WorkLog.svelte';
+    import { WorkLogTypeColors, WorkLogTypeMap } from '$lib/const/workLogTypes';
     import { ChevronLeft, ChevronRight, Clock, Calendar, Banknote, Plus, Building2, Pencil } from 'lucide-svelte';
     import { Currency } from '$lib/const/currency';
 
