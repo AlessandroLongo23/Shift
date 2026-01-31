@@ -6,8 +6,10 @@
     import { currencyList } from '$lib/stores/currency.js';
     import { exchangeRates, fetchExchangeRates, convertCurrency } from '$lib/stores/exchangeRates.js';
     import { formatCurrency, calculateTotalExperience } from '$lib/utils/format.js';
-    import { ContractTypeMap } from '$lib/models/Position.svelte';
-    import { Briefcase, Calendar, Banknote, Building2, Plus, RefreshCw, Clock, MapPin, FileText } from 'lucide-svelte';
+    import { ContractType, ContractTypeMap } from '$lib/const/contract';
+    import { Currency } from '$lib/const/currency';
+    import { Briefcase, Calendar, Banknote, Building2, Plus, Clock } from 'lucide-svelte';
+
     import Button from '$lib/components/ui/Button.svelte';
     import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
     import PositionModal from '$lib/components/timeline/PositionModal.svelte';
@@ -16,7 +18,7 @@
     let isPositionModalOpen = $state(false);
     let isCompanyModalOpen = $state(false);
     let editingPosition = $state(null);
-    let selectedCurrency = $state('EUR');
+    let selectedCurrency = $state(Currency.EURO);
     let rates = $state({});
     let loadingRates = $state(false);
 
@@ -42,7 +44,7 @@
     // Get position currency for a paycheck
     function getPaycheckCurrency(paycheck) {
         const position = positionsStore.getById(paycheck.position_id);
-        return position?.currency || 'EUR';
+        return position?.currency || Currency.EURO;
     }
 
     // Convert amount to selected currency
@@ -103,13 +105,6 @@
         id: c.code,
         name: `${c.code} (${c.symbol})`
     }));
-
-    async function refreshRates() {
-        loadingRates = true;
-        exchangeRates.set({});
-        rates = await fetchExchangeRates();
-        loadingRates = false;
-    }
 </script>
 
 <svelte:head>
@@ -155,15 +150,6 @@
             searchable={false}
             classes="w-40"
         />
-        <button
-            type="button"
-            onclick={refreshRates}
-            disabled={loadingRates}
-            class="p-2 rounded-lg border border-zinc-500/25 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
-            title="Refresh exchange rates"
-        >
-            <RefreshCw class="w-4 h-4 {loadingRates ? 'animate-spin' : ''}" />
-        </button>
     </div>
 
     <!-- Stats Cards -->

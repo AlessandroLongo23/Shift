@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { Guard } from '$lib/server/guards.js';
+import { Currency } from '$lib/const/currency';
 
 export async function GET({ locals: { supabase } }) {
     try {
@@ -38,7 +39,7 @@ export async function POST({ request, locals: { supabase } }) {
                 start_date: position.start_date,
                 end_date: position.end_date || null,
                 base_salary: position.base_salary || null,
-                currency: position.currency || 'EUR',
+                currency: position.currency || Currency.EURO,
                 description: position.description || null,
                 skills: position.skills || []
             })

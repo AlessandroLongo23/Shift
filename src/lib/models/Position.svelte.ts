@@ -1,13 +1,8 @@
 import { Briefcase, Calendar, Banknote, FileText, Tag } from 'lucide-svelte';
 import { formatCurrency, formatDate } from '$lib/utils/format.js';
+import { Currency } from '$lib/const/currency';
+import { ContractType, ContractTypeMap } from '$lib/const/contract';
 
-export type ContractType = 'full-time' | 'part-time' | 'freelance';
-
-export const ContractTypeMap: Record<ContractType, string> = {
-    'full-time': 'Full-time',
-    'part-time': 'Part-time',
-    'freelance': 'Freelance'
-};
 
 export class Position {
     id: string;
@@ -35,7 +30,7 @@ export class Position {
         this.start_date = position.start_date;
         this.end_date = position.end_date;
         this.base_salary = position.base_salary;
-        this.currency = position.currency || 'EUR';
+        this.currency = position.currency || Currency.EURO;
         this.description = position.description;
         this.skills = position.skills || [];
         this.created_at = position.created_at;
@@ -104,11 +99,12 @@ export class Position {
             icon: FileText,
             display: (position: Position) => {
                 const colors: Record<ContractType, string> = {
-                    'full-time': 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300',
-                    'part-time': 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300',
-                    'freelance': 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'
+                    [ContractType.FULL_TIME]: 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300',
+                    [ContractType.PART_TIME]: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300',
+                    [ContractType.FREELANCE]: 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300',
+                    [ContractType.STUDENT]: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300'
                 };
-                return `<span class="rounded-full px-2 py-1 text-xs ${colors[position.contract_type]}">${ContractTypeMap[position.contract_type]}</span>`;
+                return `<span class="rounded-full px-2 py-1 text-xs ${colors[position.contract_type]}">${ContractTypeMap[position.contract_type as ContractType]}</span>`;
             }
         },
         {

@@ -1,4 +1,5 @@
 import { settingsStore } from '$lib/stores/settings.js';
+import { Currency } from '$lib/const/currency';
 
 /**
  * Get the pay period for a given year and month
@@ -101,7 +102,7 @@ export function calculatePaycheckHourlyRate(paycheck, workLogs, currencyConverte
     const totalHours = getTotalHoursInPeriod(workLogs, year, month, 'work');
     
     let netAmount = paycheck.net_amount;
-    let currency = 'EUR';
+    let currency = Currency.EURO;
     
     if (getCurrency) {
         currency = getCurrency(paycheck);

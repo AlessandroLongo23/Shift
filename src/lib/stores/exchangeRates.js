@@ -1,4 +1,5 @@
 import { writable, get } from 'svelte/store';
+import { Currency } from '$lib/const/currency';
 
 export const exchangeRates = writable({});
 export const exchangeRatesLoading = writable(false);
@@ -54,7 +55,7 @@ export const convertCurrency = (amount, fromCurrency, toCurrency, rates) => {
     
     let amountInEUR;
     
-    if (fromCurrency === 'EUR') {
+    if (fromCurrency === Currency.EURO) {
         amountInEUR = amount;
     } else {
         const rateFromEUR = rates[fromCurrency];
@@ -65,7 +66,7 @@ export const convertCurrency = (amount, fromCurrency, toCurrency, rates) => {
         amountInEUR = amount / rateFromEUR;
     }
     
-    if (toCurrency === 'EUR') {
+    if (toCurrency === Currency.EURO) {
         return amountInEUR;
     }
     

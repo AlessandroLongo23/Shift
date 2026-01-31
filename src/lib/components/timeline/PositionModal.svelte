@@ -1,6 +1,9 @@
 <script>
     import { positionsStore } from '$lib/stores/positions.svelte.js';
     import { currencyList } from '$lib/stores/currency.js';
+    import { Currency } from '$lib/const/currency';
+    import { ContractType, ContractTypeMap } from '$lib/const/contract';
+
     import Modal from '$lib/components/ui/Modal.svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import Input from '$lib/components/ui/Input.svelte';
@@ -17,11 +20,11 @@
     let form = $state({
         company_id: '',
         job_title: '',
-        contract_type: 'full-time',
+        contract_type: ContractType.FULL_TIME,
         start_date: '',
         end_date: '',
         base_salary: '',
-        currency: 'EUR',
+        currency: Currency.EURO,
         description: '',
         skills: ''
     });
@@ -31,11 +34,11 @@
             form = {
                 company_id: position.company_id || '',
                 job_title: position.job_title || '',
-                contract_type: position.contract_type || 'full-time',
+                contract_type: position.contract_type || ContractType.FULL_TIME,
                 start_date: position.start_date || '',
                 end_date: position.end_date || '',
                 base_salary: position.base_salary?.toString() || '',
-                currency: position.currency || 'EUR',
+                currency: position.currency || Currency.EURO,
                 description: position.description || '',
                 skills: position.skills?.join(', ') || ''
             };
@@ -43,11 +46,11 @@
             form = {
                 company_id: '',
                 job_title: '',
-                contract_type: 'full-time',
+                contract_type: ContractType.FULL_TIME,
                 start_date: '',
                 end_date: '',
                 base_salary: '',
-                currency: 'EUR',
+                currency: Currency.EURO,
                 description: '',
                 skills: ''
             };
@@ -146,9 +149,9 @@
                 bind:value={form.contract_type}
                 class="w-full px-3 py-2 rounded-lg border border-zinc-500/25 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
             >
-                <option value="full-time">Full-time</option>
-                <option value="part-time">Part-time</option>
-                <option value="freelance">Freelance</option>
+                {#each Object.values(ContractType) as contractType}
+                    <option value={contractType}>{ContractTypeMap[contractType]}</option>
+                {/each}
             </select>
         </div>
 

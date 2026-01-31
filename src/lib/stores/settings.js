@@ -1,5 +1,6 @@
 import { writable, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { Currency } from '$lib/const/currency';
 
 const STORAGE_KEY = 'shift_settings';
 
@@ -15,7 +16,7 @@ const defaultSettings = {
     periodEndDay: 15,   // Day of current month when period ends
     
     // Display preferences
-    defaultCurrency: 'EUR'
+    defaultCurrency: Currency.EURO
 };
 
 function loadSettings() {

@@ -1,8 +1,9 @@
 <script>
     import { settingsStore } from '$lib/stores/settings.js';
     import { currencyList } from '$lib/stores/currency.js';
+    import { Currency } from '$lib/const/currency';
     import { Settings, Calendar, Banknote, RotateCcw } from 'lucide-svelte';
-    import Button from '$lib/components/ui/Button.svelte';
+
     import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 
     // Local state bound to the store
@@ -10,7 +11,7 @@
     let useCustomPeriod = $state(false);
     let periodStartDay = $state('16');
     let periodEndDay = $state('15');
-    let defaultCurrency = $state('EUR');
+    let defaultCurrency = $state(Currency.EURO);
 
     // Sync with store on mount
     $effect(() => {

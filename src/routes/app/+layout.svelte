@@ -67,7 +67,7 @@
             <!-- Logo -->
             <div class="flex items-center gap-3 px-6 h-16 border-b border-zinc-500/25 shrink-0">
                 <div class="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">
-                    <Briefcase class="w-4 h-4 text-white dark:text-zinc-900" />
+                    <img src="/logo.png" alt="Shift" class="w-full h-full object-cover" />
                 </div>
                 <span class="text-xl font-bold">Shift</span>
             </div>

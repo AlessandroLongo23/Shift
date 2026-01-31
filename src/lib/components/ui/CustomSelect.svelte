@@ -13,6 +13,7 @@
         disabled = false,
         searchable = true,
         maxHeight = 'max-h-40',
+        type = "flat",
         classes = '',
         onchange = () => {}
     } = $props();
@@ -130,7 +131,7 @@
         type="button"
         role="button"
         tabindex="0"
-        class="w-full px-3 py-2 text-left bg-white dark:bg-zinc-800 border border-zinc-500/25 rounded-lg shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors flex items-center justify-between {disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}"
+        class="w-full px-3 py-2 text-left bg-white dark:bg-zinc-800 border border-zinc-500/25 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors flex items-center justify-between {type === '3d' ? 'shadow-sm' : 'shadow-none'} {disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}"
         onclick={() => {
             if (!disabled) {
                 isOpen = !isOpen;
@@ -166,7 +167,7 @@
     
     {#if isOpen}
         <div 
-            class="absolute w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-500/25 rounded-lg shadow-lg z-50 overflow-hidden"
+            class="absolute w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-500/25 rounded-lg {type === '3d' ? 'shadow-lg' : 'shadow-none'} z-50 overflow-hidden"
             transition:fade={{ duration: 100 }}
         >
             {#if searchable}

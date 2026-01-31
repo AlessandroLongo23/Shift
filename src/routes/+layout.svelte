@@ -6,6 +6,13 @@
 </script>
 
 <svelte:head>
+	<title>Shift</title>
+	<meta name="description" content="Shift is a time tracking tool for freelancers and small businesses." />
+	<meta name="keywords" content="time tracking, freelancing, small business, productivity" />
+	<meta name="author" content="Shift" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="robots" content="index, follow" />
+	<link rel="icon" href="/logo.png" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />

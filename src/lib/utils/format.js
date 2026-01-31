@@ -1,12 +1,14 @@
+import { Currency } from "$lib/const/currency";
+
 /**
  * Format a number as currency
  * @param {number} amount - The amount to format
  * @param {string} currency - Currency code (default: EUR)
  * @returns {string} Formatted currency string
  */
-export function formatCurrency(amount, currency = 'EUR') {
+export function formatCurrency(amount, currency = Currency.EURO) {
     // Handle DKK and other Scandinavian currencies specially
-    if (['DKK', 'NOK', 'SEK'].includes(currency)) {
+    if ([Currency.DKK].includes(currency)) {
         return new Intl.NumberFormat('da-DK', {
             style: 'currency',
             currency: currency,
