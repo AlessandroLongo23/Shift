@@ -1,5 +1,5 @@
 import { Banknote, Calendar, FileUp, Link } from 'lucide-svelte';
-import { formatCurrency, formatDate } from '$lib/utils/format.js';
+import { formatCurrency } from '$lib/utils/format.js';
 
 export class Paycheck {
     id: string;

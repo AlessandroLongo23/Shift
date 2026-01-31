@@ -7,6 +7,7 @@
     import Modal from '$lib/components/ui/Modal.svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import Input from '$lib/components/ui/Input.svelte';
+    import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 
     let { 
         isOpen = $bindable(false), 
@@ -28,6 +29,11 @@
         description: '',
         skills: ''
     });
+
+    let contractTypeOptions = $derived(Object.values(ContractType).map(contractType => ({
+        value: contractType,
+        label: ContractTypeMap[contractType]
+    })));
 
     $effect(() => {
         if (position) {
@@ -120,17 +126,13 @@
             <label for="company" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Company <span class="text-red-500">*</span>
             </label>
-            <select
-                id="company"
+            <CustomSelect
                 bind:value={form.company_id}
-                required
-                class="w-full px-3 py-2 rounded-lg border border-zinc-500/25 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
-            >
-                <option value="">Select a company</option>
-                {#each companies as company}
-                    <option value={company.id}>{company.name}</option>
-                {/each}
-            </select>
+                options={companies}
+                labelKey="name"
+                valueKey="id"
+                placeholder="Select a company"
+            />
         </div>
 
         <Input
@@ -144,15 +146,13 @@
             <label for="contract_type" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Contract Type
             </label>
-            <select
-                id="contract_type"
+            <CustomSelect
                 bind:value={form.contract_type}
-                class="w-full px-3 py-2 rounded-lg border border-zinc-500/25 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
-            >
-                {#each Object.values(ContractType) as contractType}
-                    <option value={contractType}>{ContractTypeMap[contractType]}</option>
-                {/each}
-            </select>
+                options={contractTypeOptions}
+                labelKey="label"
+                valueKey="value"
+                placeholder="Select a contract type"
+            />
         </div>
 
         <div class="grid grid-cols-2 gap-4">

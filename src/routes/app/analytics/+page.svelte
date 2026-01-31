@@ -7,17 +7,15 @@
     import { currencyList } from '$lib/stores/currency.js';
     import { exchangeRates, fetchExchangeRates, convertCurrency } from '$lib/stores/exchangeRates.js';
     import { formatCurrency, formatHours } from '$lib/utils/format.js';
-    import { 
-        getPaycheckPeriodRef, 
-        getTotalHoursInPeriod, 
-        formatPayPeriod 
-    } from '$lib/utils/period.js';
+    import { getPaycheckPeriodRef, getTotalHoursInPeriod, formatPayPeriod } from '$lib/utils/period.js';
     import { TrendingUp, DollarSign, Clock, Calendar, BarChart3, Info, Table, Building2, ChevronLeft, ChevronRight } from 'lucide-svelte';
-    import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
-    import ChartTooltip from '$lib/components/ui/ChartTooltip.svelte';
-    import { Chart } from 'chart.js/auto';
     import { themeStore } from '$lib/components/theme/theme.js';
     import { Currency } from '$lib/const/currency';
+    import { WorkLogType } from '$lib/const/workLogTypes';
+    import { Chart } from 'chart.js/auto';
+
+    import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
+    import ChartTooltip from '$lib/components/ui/ChartTooltip.svelte';
 
     /** @typedef {{ year: string, value: number, color: string }} TooltipItem */
     /** @typedef {{ title: string, items: TooltipItem[], x: number, y: number }} TooltipData */
@@ -134,7 +132,7 @@
             const position = getPaycheckPosition(paycheck);
             
             // Use the centralized function that respects pay period settings
-            const totalHours = getTotalHoursInPeriod(workLogsStore.workLogs, year, month, 'work');
+            const totalHours = getTotalHoursInPeriod(workLogsStore.workLogs, year, month, WorkLogType.WORK);
             
             const convertedNetAmount = toSelectedCurrency(paycheck.net_amount, paycheckCurrency);
             const hourlyRate = totalHours > 0 ? convertedNetAmount / totalHours : 0;
@@ -636,7 +634,7 @@
     <!-- Charts -->
     <div class="grid lg:grid-cols-2 gap-6">
         <!-- Real Hourly Rate Chart -->
-        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25 overflow-hidden">
+        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25">
             <div class="p-5 border-b border-zinc-500/25 flex flex-col sm:flex-row sm:items-center gap-4">
                 <div class="flex items-center gap-3 flex-1">
                     <div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
@@ -710,7 +708,7 @@
         </div>
 
         <!-- Income Progression Chart -->
-        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25 overflow-hidden">
+        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25">
             <div class="p-5 border-b border-zinc-500/25 flex items-center gap-3">
                 <div class="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                     <TrendingUp class="w-5 h-5 text-blue-600 dark:text-blue-400" />

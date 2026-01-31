@@ -1,27 +1,7 @@
 import { Clock, Calendar, Smile, FileText } from 'lucide-svelte';
 import { formatDate, formatHours } from '$lib/utils/format.js';
 import { moodsOptions } from '$lib/const/moods';
-
-export enum WorkLogType {
-    WORK = 'work',
-    VACATION = 'vacation',
-    SICK_LEAVE = 'sick_leave',
-    PERMIT = 'permit'
-}
-
-export const WorkLogTypeMap: Record<WorkLogType, string> = {
-    [WorkLogType.WORK]: 'Work',
-    [WorkLogType.VACATION]: 'Vacation',
-    [WorkLogType.SICK_LEAVE]: 'Sick Leave',
-    [WorkLogType.PERMIT]: 'Permit'
-};
-
-export const WorkLogTypeColors: Record<WorkLogType, string> = {
-    [WorkLogType.WORK]: 'bg-emerald-500',
-    [WorkLogType.VACATION]: 'bg-blue-500',
-    [WorkLogType.SICK_LEAVE]: 'bg-red-500',
-    [WorkLogType.PERMIT]: 'bg-amber-500'
-};
+import { WorkLogType, WorkLogTypeColors, WorkLogTypeMap, workLogTypeOptions } from '$lib/const/workLogTypes';
 
 export class WorkLog {
     id: string;

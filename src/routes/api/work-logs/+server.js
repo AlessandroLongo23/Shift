@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { Guard } from '$lib/server/guards.js';
+import { WorkLogType } from '$lib/const/workLogTypes';
 
 export async function GET({ url, locals: { supabase } }) {
     try {
@@ -50,7 +51,7 @@ export async function POST({ request, locals: { supabase } }) {
                 check_out: workLog.check_out || null,
                 break_minutes: workLog.break_minutes || 0,
                 hours_worked: workLog.hours_worked || 0,
-                type: workLog.type || 'work',
+                type: workLog.type || WorkLogType.WORK,
                 notes: workLog.notes || null,
                 mood_rating: workLog.mood_rating || null
             })

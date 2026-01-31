@@ -2,7 +2,7 @@
     import { workLogsStore } from '$lib/stores/workLogs.svelte.js';
     import { formatDate, formatHours } from '$lib/utils/format.js';
     import { moodsOptions } from '$lib/const/moods';
-	import { WorkLogType } from '$lib/const/workLogTypes';
+	import { WorkLogType, workLogTypeOptions } from '$lib/const/workLogTypes';
 
     import Modal from '$lib/components/ui/Modal.svelte';
     import Button from '$lib/components/ui/Button.svelte';
@@ -23,7 +23,7 @@
         check_in: '09:00',
         check_out: '17:00',
         break_minutes: '30',
-        type: 'work',
+        type: WorkLogType.WORK,
         notes: '',
         mood_rating: 3
     });
@@ -56,7 +56,7 @@
                     check_in: existingLog.check_in || '09:00',
                     check_out: existingLog.check_out || '18:00',
                     break_minutes: existingLog.break_minutes?.toString() || '30',
-                    type: existingLog.type || 'work',
+                    type: existingLog.type || WorkLogType.WORK,
                     notes: existingLog.notes || '',
                     mood_rating: existingLog.mood_rating || 3
                 };
@@ -68,7 +68,7 @@
                     check_in: '09:00',
                     check_out: '17:00',
                     break_minutes: '30',
-                    type: 'work',
+                    type: WorkLogType.WORK,
                     notes: '',
                     mood_rating: 3
                 };
@@ -157,14 +157,14 @@
             </label>
             <CustomSelect
                 bind:value={form.type}
-                options={[{ value: 'work', label: 'Work' }, { value: 'vacation', label: 'Vacation' }, { value: 'sick_leave', label: 'Sick Leave' }, { value: 'permit', label: 'Permit' }]}
+                options={workLogTypeOptions}
                 labelKey="label"
                 valueKey="value"
                 placeholder="Select a type"
             />
         </div>
 
-        {#if form.type === 'work'}
+        {#if form.type === WorkLogType.WORK}
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1.5">
                     <label for="check_in" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
