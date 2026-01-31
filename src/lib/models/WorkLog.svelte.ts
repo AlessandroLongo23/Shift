@@ -1,20 +1,26 @@
 import { Clock, Calendar, Smile, FileText } from 'lucide-svelte';
 import { formatDate, formatHours } from '$lib/utils/format.js';
+import { moodsOptions } from '$lib/const/moods';
 
-export type WorkLogType = 'work' | 'vacation' | 'sick_leave' | 'permit';
+export enum WorkLogType {
+    WORK = 'work',
+    VACATION = 'vacation',
+    SICK_LEAVE = 'sick_leave',
+    PERMIT = 'permit'
+}
 
 export const WorkLogTypeMap: Record<WorkLogType, string> = {
-    'work': 'Work',
-    'vacation': 'Vacation',
-    'sick_leave': 'Sick Leave',
-    'permit': 'Permit'
+    [WorkLogType.WORK]: 'Work',
+    [WorkLogType.VACATION]: 'Vacation',
+    [WorkLogType.SICK_LEAVE]: 'Sick Leave',
+    [WorkLogType.PERMIT]: 'Permit'
 };
 
 export const WorkLogTypeColors: Record<WorkLogType, string> = {
-    'work': 'bg-emerald-500',
-    'vacation': 'bg-blue-500',
-    'sick_leave': 'bg-red-500',
-    'permit': 'bg-amber-500'
+    [WorkLogType.WORK]: 'bg-emerald-500',
+    [WorkLogType.VACATION]: 'bg-blue-500',
+    [WorkLogType.SICK_LEAVE]: 'bg-red-500',
+    [WorkLogType.PERMIT]: 'bg-amber-500'
 };
 
 export class WorkLog {
@@ -41,7 +47,7 @@ export class WorkLog {
         this.break_minutes = workLog.break_minutes || 0;
         // Calculate hours_worked from check_in/check_out if available, otherwise use stored value
         this.hours_worked = workLog.hours_worked || this.calculateHoursWorked();
-        this.type = workLog.type || 'work';
+        this.type = workLog.type || WorkLogType.WORK;
         this.notes = workLog.notes;
         this.mood_rating = workLog.mood_rating;
         this.created_at = workLog.created_at;
@@ -58,8 +64,8 @@ export class WorkLog {
     }
 
     public getMoodEmoji(): string {
-        const moods = ['😢', '😕', '😐', '🙂', '😄'];
-        return this.mood_rating ? moods[this.mood_rating - 1] : '—';
+        const moods = moodsOptions;
+        return this.mood_rating ? moods.find(m => m.value === this.mood_rating)?.emoji || '—' : '—';
     }
 
     public getTimeRange(): string {

@@ -100,6 +100,14 @@ function createPaychecksStore() {
         },
 
         getByMonth(year, month) {
+            return paychecks.filter(p => {
+                const d = new Date(p.reference_date);
+                return d.getFullYear() === year && d.getMonth() === month;
+            });
+        },
+
+        // For backward compatibility - get first paycheck for month
+        getFirstByMonth(year, month) {
             return paychecks.find(p => {
                 const d = new Date(p.reference_date);
                 return d.getFullYear() === year && d.getMonth() === month;

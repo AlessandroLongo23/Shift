@@ -43,7 +43,24 @@ export class Position {
     }
 
     public isCurrent(): boolean {
-        return this.end_date === null || this.end_date === undefined || this.end_date === '';
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const startDate = new Date(this.start_date);
+        startDate.setHours(0, 0, 0, 0);
+        
+        // If today is before start date, not current
+        if (today < startDate) return false;
+        
+        // If no end date, position is current (ongoing)
+        if (this.end_date === null || this.end_date === undefined || this.end_date === '') {
+            return true;
+        }
+        
+        // Check if today is before or on the end date
+        const endDate = new Date(this.end_date);
+        endDate.setHours(23, 59, 59, 999);
+        return today <= endDate;
     }
 
     public getDurationMonths(): number {

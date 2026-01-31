@@ -57,7 +57,7 @@ export function formatHours(hours) {
     if (hours == null || isNaN(hours)) return '0:00';
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
-    return `${h}:${m.toString().padStart(2, '0')}`;
+    return `${h} h ${m.toString().padStart(2, '0')} m`;
 }
 
 /**

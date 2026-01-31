@@ -1,9 +1,11 @@
 <script>
     import { workLogsStore } from '$lib/stores/workLogs.svelte.js';
     import { formatDate, formatHours } from '$lib/utils/format.js';
+    import { moodsOptions } from '$lib/const/moods';
+	import { WorkLogType } from '$lib/const/workLogTypes';
+
     import Modal from '$lib/components/ui/Modal.svelte';
     import Button from '$lib/components/ui/Button.svelte';
-    import Input from '$lib/components/ui/Input.svelte';
     import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 
     let { 
@@ -19,8 +21,8 @@
     let form = $state({
         position_id: '',
         check_in: '09:00',
-        check_out: '18:00',
-        break_minutes: '60',
+        check_out: '17:00',
+        break_minutes: '30',
         type: 'work',
         notes: '',
         mood_rating: 3
@@ -53,7 +55,7 @@
                     position_id: existingLog.position_id || '',
                     check_in: existingLog.check_in || '09:00',
                     check_out: existingLog.check_out || '18:00',
-                    break_minutes: existingLog.break_minutes?.toString() || '60',
+                    break_minutes: existingLog.break_minutes?.toString() || '30',
                     type: existingLog.type || 'work',
                     notes: existingLog.notes || '',
                     mood_rating: existingLog.mood_rating || 3
@@ -64,8 +66,8 @@
                 form = {
                     position_id: currentPos?.id || '',
                     check_in: '09:00',
-                    check_out: '18:00',
-                    break_minutes: '60',
+                    check_out: '17:00',
+                    break_minutes: '30',
                     type: 'work',
                     notes: '',
                     mood_rating: 3
@@ -74,13 +76,7 @@
         }
     });
 
-    const moods = [
-        { value: 1, emoji: '😢', label: 'Very Bad' },
-        { value: 2, emoji: '😕', label: 'Bad' },
-        { value: 3, emoji: '😐', label: 'Okay' },
-        { value: 4, emoji: '🙂', label: 'Good' },
-        { value: 5, emoji: '😄', label: 'Great' }
-    ];
+    
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -90,10 +86,10 @@
         const data = {
             position_id: form.position_id,
             date: date,
-            check_in: form.type === 'work' ? form.check_in : null,
-            check_out: form.type === 'work' ? form.check_out : null,
-            break_minutes: form.type === 'work' ? parseInt(form.break_minutes) || 0 : 0,
-            hours_worked: form.type === 'work' ? calculatedHours : 0,
+            check_in: form.type === WorkLogType.WORK ? form.check_in : null,
+            check_out: form.type === WorkLogType.WORK ? form.check_out : null,
+            break_minutes: form.type === WorkLogType.WORK ? parseInt(form.break_minutes) || 0 : 0,
+            hours_worked: form.type === WorkLogType.WORK ? calculatedHours : 0,
             type: form.type,
             notes: form.notes || null,
             mood_rating: form.mood_rating
@@ -159,16 +155,13 @@
             <label for="type" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Type
             </label>
-            <select
-                id="type"
+            <CustomSelect
                 bind:value={form.type}
-                class="w-full px-3 py-2 rounded-lg border border-zinc-500/25 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
-            >
-                <option value="work">Work</option>
-                <option value="vacation">Vacation</option>
-                <option value="sick_leave">Sick Leave</option>
-                <option value="permit">Permit</option>
-            </select>
+                options={[{ value: 'work', label: 'Work' }, { value: 'vacation', label: 'Vacation' }, { value: 'sick_leave', label: 'Sick Leave' }, { value: 'permit', label: 'Permit' }]}
+                labelKey="label"
+                valueKey="value"
+                placeholder="Select a type"
+            />
         </div>
 
         {#if form.type === 'work'}
@@ -208,7 +201,7 @@
                     max="480"
                     step="5"
                     bind:value={form.break_minutes}
-                    placeholder="60"
+                    placeholder="30"
                     class="w-full px-3 py-2 rounded-lg border border-zinc-500/25 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
                 />
             </div>
@@ -229,17 +222,16 @@
                 Mood
             </label>
             <div class="flex gap-2">
-                {#each moods as mood}
+                {#each moodsOptions as mood}
                     <button
                         type="button"
                         onclick={() => form.mood_rating = mood.value}
                         class="
                             flex-1 py-3 rounded-lg text-2xl transition-all
-                            {form.mood_rating === mood.value 
+                            {form.mood_rating === mood.value
                                 ? 'bg-zinc-100 dark:bg-zinc-800 ring-2 ring-zinc-400 dark:ring-zinc-600' 
                                 : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'}
-                        "
-                        title={mood.label}
+                        " title={mood.label}
                     >
                         {mood.emoji}
                     </button>

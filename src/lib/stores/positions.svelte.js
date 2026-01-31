@@ -14,6 +14,10 @@ function createPositionsStore() {
             return positions.find(p => p.isCurrent());
         },
 
+        get currentPositions() {
+            return positions.filter(p => p.isCurrent());
+        },
+
         get sortedByDate() {
             return [...positions].sort((a, b) => 
                 new Date(b.start_date).getTime() - new Date(a.start_date).getTime()

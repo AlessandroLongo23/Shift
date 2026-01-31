@@ -7,8 +7,9 @@
     import { currencyList } from '$lib/stores/currency.js';
     import { exchangeRates, fetchExchangeRates, convertCurrency } from '$lib/stores/exchangeRates.js';
     import { formatCurrency, formatHours, formatTime } from '$lib/utils/format.js';
+    import { getPayPeriod, getPeriodStats, formatPayPeriod } from '$lib/utils/period.js';
     import { WorkLogTypeColors, WorkLogTypeMap } from '$lib/models/WorkLog.svelte';
-    import { ChevronLeft, ChevronRight, Clock, Calendar, Banknote, Plus, RefreshCw } from 'lucide-svelte';
+    import { ChevronLeft, ChevronRight, Clock, Calendar, Banknote, Plus, RefreshCw, Building2, Pencil } from 'lucide-svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
     import WorkLogModal from '$lib/components/workspace/WorkLogModal.svelte';
@@ -18,6 +19,7 @@
     let selectedDate = $state(null);
     let isWorkLogModalOpen = $state(false);
     let isPaycheckModalOpen = $state(false);
+    let editingPaycheck = $state(null);
     let selectedCurrency = $state('EUR');
     let rates = $state({});
     let loadingRates = $state(false);
@@ -75,10 +77,15 @@
         currentDate = new Date();
     }
 
+    // Get position for a paycheck
+    function getPosition(paycheck) {
+        if (!paycheck) return null;
+        return positionsStore.getById(paycheck.position_id);
+    }
+
     // Get position currency for a paycheck
     function getPaycheckCurrency(paycheck) {
-        if (!paycheck) return 'EUR';
-        const position = positionsStore.getById(paycheck.position_id);
+        const position = getPosition(paycheck);
         return position?.currency || 'EUR';
     }
 
@@ -88,9 +95,9 @@
         return convertCurrency(amount, fromCurrency, selectedCurrency, rates);
     }
 
-    // Get pay period for current month
+    // Get pay period for current month (using centralized utility)
     let payPeriod = $derived(() => {
-        return settingsStore.getPayPeriod(year, month);
+        return getPayPeriod(year, month);
     });
 
     // Get weekday names based on settings
@@ -158,38 +165,25 @@
                date.getFullYear() === today.getFullYear();
     }
 
-    // Calculate stats based on pay period
+    // Calculate stats based on pay period (using centralized utility)
     let monthStats = $derived(() => {
-        const { startDate, endDate } = payPeriod();
-        
-        // Filter logs within the pay period
-        const periodLogs = workLogsStore.workLogs.filter(log => {
-            const logDate = new Date(log.date);
-            logDate.setHours(0, 0, 0, 0);
-            const start = new Date(startDate);
-            start.setHours(0, 0, 0, 0);
-            const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
-            return logDate >= start && logDate <= end;
-        });
-        
-        return {
-            totalHours: periodLogs.reduce((sum, log) => sum + (log.hours_worked || 0), 0),
-            workDays: periodLogs.filter(log => log.type === 'work').length,
-            vacationDays: periodLogs.filter(log => log.type === 'vacation').length
-        };
+        return getPeriodStats(workLogsStore.workLogs, year, month);
     });
 
-    let monthPaycheck = $derived(paychecksStore.getByMonth(year, month));
-    let paycheckCurrency = $derived(getPaycheckCurrency(monthPaycheck));
+    // Get all paychecks for this month
+    let monthPaychecks = $derived(paychecksStore.getByMonth(year, month));
 
-    // Format pay period for display
+    // Calculate total net for the month (across all paychecks)
+    let totalMonthNet = $derived(() => {
+        return monthPaychecks.reduce((sum, p) => {
+            const currency = getPaycheckCurrency(p);
+            return sum + toSelectedCurrency(p.net_amount, currency);
+        }, 0);
+    });
+
+    // Format pay period for display (using centralized utility)
     let payPeriodLabel = $derived(() => {
-        const { startDate, endDate } = payPeriod();
-        const formatOpts = { month: 'short', day: 'numeric', year: 'numeric' };
-        const startStr = startDate.toLocaleDateString('en-US', formatOpts);
-        const endStr = endDate.toLocaleDateString('en-US', formatOpts);
-        return `${startStr} - ${endStr}`;
+        return formatPayPeriod(year, month);
     });
 
     // Currency options for select
@@ -203,6 +197,16 @@
         exchangeRates.set({});
         rates = await fetchExchangeRates();
         loadingRates = false;
+    }
+
+    function handleAddPaycheck() {
+        editingPaycheck = null;
+        isPaycheckModalOpen = true;
+    }
+
+    function handleEditPaycheck(paycheck) {
+        editingPaycheck = paycheck;
+        isPaycheckModalOpen = true;
     }
 </script>
 
@@ -222,7 +226,7 @@
     positions={positionsStore.positions}
     {year}
     {month}
-    existingPaycheck={monthPaycheck}
+    existingPaycheck={editingPaycheck}
 />
 
 <div class="max-w-6xl mx-auto space-y-6">
@@ -357,62 +361,93 @@
                         </div>
                         <span class="font-semibold">{monthStats().vacationDays}</span>
                     </div>
-                </div>
-            </div>
 
-            <!-- Paycheck Card -->
-            <div class="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25 space-y-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="font-semibold">Paycheck</h3>
-                    {#if monthPaycheck}
-                        <Button variant="ghost" size="sm" onclick={() => isPaycheckModalOpen = true}>Edit</Button>
-                    {/if}
-                </div>
-
-                {#if monthPaycheck}
-                    {@const convertedNet = toSelectedCurrency(monthPaycheck.net_amount, paycheckCurrency)}
-                    {@const convertedGross = monthPaycheck.gross_amount ? toSelectedCurrency(monthPaycheck.gross_amount, paycheckCurrency) : null}
-                    {@const convertedBonuses = monthPaycheck.bonuses > 0 ? toSelectedCurrency(monthPaycheck.bonuses, paycheckCurrency) : 0}
-                    {@const periodHours = monthStats().totalHours}
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-zinc-600 dark:text-zinc-400">Net Amount</span>
-                            <span class="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(convertedNet, selectedCurrency)}</span>
-                        </div>
-                        {#if convertedGross}
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">Gross Amount</span>
-                                <span class="text-sm">{formatCurrency(convertedGross, selectedCurrency)}</span>
-                            </div>
-                        {/if}
-                        {#if convertedBonuses > 0}
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">Bonuses</span>
-                                <span class="text-sm text-emerald-600">+{formatCurrency(convertedBonuses, selectedCurrency)}</span>
-                            </div>
-                        {/if}
+                    {#if monthPaychecks.length > 0}
                         <div class="pt-3 border-t border-zinc-500/25">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">Hourly Rate</span>
+                                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+                                    <Banknote class="w-4 h-4" />
+                                    <span class="text-sm">Hourly Rate</span>
+                                </div>
                                 <span class="font-semibold">
-                                    {periodHours > 0 
-                                        ? formatCurrency(convertedNet / periodHours, selectedCurrency) + '/h'
+                                    {monthStats().totalHours > 0 
+                                        ? formatCurrency(totalMonthNet() / monthStats().totalHours, selectedCurrency) + '/h'
                                         : '—'}
                                 </span>
                             </div>
                         </div>
-                        {#if monthPaycheck.is_synced_to_budget}
-                            <div class="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                Synced to FinTrack
+                    {/if}
+                </div>
+            </div>
+
+            <!-- Paychecks Card -->
+            <div class="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-semibold">Paychecks</h3>
+                    <Button variant="ghost" size="sm" onclick={handleAddPaycheck}>
+                        <Plus class="w-4 h-4" />
+                        Add
+                    </Button>
+                </div>
+
+                {#if monthPaychecks.length > 0}
+                    <div class="space-y-3">
+                        {#each monthPaychecks as paycheck}
+                            {@const position = getPosition(paycheck)}
+                            {@const paycheckCurrency = getPaycheckCurrency(paycheck)}
+                            {@const convertedNet = toSelectedCurrency(paycheck.net_amount, paycheckCurrency)}
+                            {@const convertedBonuses = paycheck.bonuses > 0 ? toSelectedCurrency(paycheck.bonuses, paycheckCurrency) : 0}
+                            
+                            <button
+                                type="button"
+                                onclick={() => handleEditPaycheck(paycheck)}
+                                class="w-full p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left"
+                            >
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <Building2 class="w-4 h-4 text-zinc-400" />
+                                            <span class="text-sm font-medium truncate">
+                                                {position?.job_title || 'Unknown'} @ {position?.company?.name || 'Unknown'}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-lg font-semibold text-emerald-600 dark:text-emerald-400">
+                                                {formatCurrency(convertedNet, selectedCurrency)}
+                                            </span>
+                                            {#if convertedBonuses > 0}
+                                                <span class="text-sm text-emerald-500">
+                                                    +{formatCurrency(convertedBonuses, selectedCurrency)}
+                                                </span>
+                                            {/if}
+                                        </div>
+                                    </div>
+                                    <Pencil class="w-4 h-4 text-zinc-400" />
+                                </div>
+                                {#if paycheck.is_synced_to_budget}
+                                    <div class="mt-2 text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        Synced to FinTrack
+                                    </div>
+                                {/if}
+                            </button>
+                        {/each}
+
+                        <!-- Total if multiple paychecks -->
+                        {#if monthPaychecks.length > 1}
+                            <div class="pt-3 border-t border-zinc-500/25 flex items-center justify-between">
+                                <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total</span>
+                                <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                                    {formatCurrency(totalMonthNet(), selectedCurrency)}
+                                </span>
                             </div>
                         {/if}
                     </div>
                 {:else}
                     <div class="text-center py-4">
                         <Banknote class="w-8 h-8 mx-auto text-zinc-400 mb-2" />
-                        <p class="text-sm text-zinc-500 mb-3">No paycheck recorded</p>
-                        <Button variant="outline" size="sm" onclick={() => isPaycheckModalOpen = true}>
+                        <p class="text-sm text-zinc-500 mb-3">No paychecks recorded</p>
+                        <Button variant="outline" size="sm" onclick={handleAddPaycheck}>
                             <Plus class="w-4 h-4" />
                             Add Paycheck
                         </Button>
