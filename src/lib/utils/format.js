@@ -94,17 +94,25 @@ export function toLocalDateString(date) {
 /**
  * Calculate years of experience from positions
  * @param {Array} positions - Array of position objects
- * @returns {number} Total years of experience
+ * @returns {string} Total experience formatted as "Xy Xm"
  */
 export function calculateTotalExperience(positions) {
     let totalMonths = 0;
-    
+    const today = new Date();
+
     for (const pos of positions) {
         const start = new Date(pos.start_date);
-        const end = pos.end_date ? new Date(pos.end_date) : new Date();
+        if (start > today) continue; // skip future positions
+
+        const rawEnd = pos.end_date ? new Date(pos.end_date) : today;
+        const end = rawEnd > today ? today : rawEnd; // cap at today
         const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
         totalMonths += Math.max(1, months);
     }
-    
-    return Math.round((totalMonths / 12) * 10) / 10;
+
+    const years = Math.floor(totalMonths / 12);
+    const months = totalMonths % 12;
+    if (years === 0) return `${months} months`;
+    if (months === 0) return `${years} years`;
+    return `${years} y ${months} m`;
 }

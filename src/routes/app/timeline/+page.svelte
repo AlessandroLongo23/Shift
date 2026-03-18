@@ -158,7 +158,7 @@
                 </div>
                 <span class="text-sm text-zinc-600 dark:text-zinc-400">Experience</span>
             </div>
-            <p class="text-2xl font-bold">{stats.totalExperience} years</p>
+            <p class="text-2xl font-bold">{stats.totalExperience}</p>
         </div>
 
         <div class="p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-500/25">
