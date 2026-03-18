@@ -1,6 +1,3 @@
-import { Banknote, Calendar, FileUp, Link } from 'lucide-svelte';
-import { formatCurrency } from '$lib/utils/format.js';
-
 export class Paycheck {
     id: string;
     user_id: string;
@@ -39,52 +36,4 @@ export class Paycheck {
         return this.net_amount + this.bonuses;
     }
 
-    public static dataColumns: any[] = [
-        {
-            label: 'Month',
-            key: 'reference_date',
-            sortable: true,
-            icon: Calendar,
-            display: (paycheck: Paycheck) => paycheck.getMonthYear()
-        },
-        {
-            label: 'Net',
-            key: 'net_amount',
-            sortable: true,
-            icon: Banknote,
-            display: (paycheck: Paycheck) => formatCurrency(paycheck.net_amount)
-        },
-        {
-            label: 'Gross',
-            key: 'gross_amount',
-            sortable: true,
-            icon: Banknote,
-            display: (paycheck: Paycheck) => paycheck.gross_amount ? formatCurrency(paycheck.gross_amount) : 'N/A'
-        },
-        {
-            label: 'Bonuses',
-            key: 'bonuses',
-            sortable: true,
-            icon: Banknote,
-            display: (paycheck: Paycheck) => paycheck.bonuses > 0 ? formatCurrency(paycheck.bonuses) : '—'
-        },
-        {
-            label: 'PDF',
-            key: 'pdf_storage_path',
-            sortable: false,
-            icon: FileUp,
-            display: (paycheck: Paycheck) => paycheck.pdf_storage_path ? '📄' : '—'
-        },
-        {
-            label: 'Synced',
-            key: 'is_synced_to_budget',
-            sortable: true,
-            icon: Link,
-            display: (paycheck: Paycheck) => {
-                return paycheck.is_synced_to_budget 
-                    ? '<span class="text-emerald-500">✓</span>' 
-                    : '<span class="text-zinc-400">—</span>';
-            }
-        }
-    ];
 }

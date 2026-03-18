@@ -1,9 +1,9 @@
 <script>
-    import { onMount, onDestroy } from 'svelte';
+    import { onDestroy } from 'svelte';
     import { paychecksStore } from '$lib/stores/paychecks.svelte.js';
     import { workLogsStore } from '$lib/stores/workLogs.svelte.js';
     import { positionsStore } from '$lib/stores/positions.svelte.js';
-    import { settingsStore } from '$lib/stores/settings.js';
+    import { settingsStore } from '$lib/stores/settings.svelte.js';
     import { currencyList } from '$lib/stores/currency.js';
     import { exchangeRates, fetchExchangeRates, convertCurrency } from '$lib/stores/exchangeRates.js';
     import { formatCurrency, formatHours } from '$lib/utils/format.js';
@@ -20,15 +20,18 @@
     /** @typedef {{ year: string, value: number, color: string }} TooltipItem */
     /** @typedef {{ title: string, items: TooltipItem[], x: number, y: number }} TooltipData */
 
+    let { data } = $props();
+
+    $effect.pre(() => {
+        positionsStore.setData(data.positions);
+        paychecksStore.setData(data.paychecks);
+        workLogsStore.setData(data.workLogs);
+    });
+
     let selectedCurrency = $state(Currency.EURO);
     /** @type {Record<string, number>} */
     let rates = $state({});
     let loadingRates = $state(false);
-    let settings = $state({
-        useCustomPeriod: false,
-        periodStartDay: 16,
-        periodEndDay: 15
-    });
     let currentTheme = $state('light');
 
     // Chart references
@@ -56,17 +59,6 @@
     let currentPage = $state(1);
     const rowsPerPage = 6;
 
-    onMount(async () => {
-        paychecksStore.fetch();
-        positionsStore.fetch();
-        workLogsStore.fetch();
-        
-        // Fetch exchange rates
-        loadingRates = true;
-        rates = await fetchExchangeRates();
-        loadingRates = false;
-    });
-
     onDestroy(() => {
         if (hourlyRateChart) hourlyRateChart.destroy();
         if (incomeChart) incomeChart.destroy();
@@ -80,19 +72,14 @@
         return unsubscribe;
     });
 
-    // Subscribe to settings store
+    // Sync default currency from settings
     $effect(() => {
-        const unsubscribe = settingsStore.subscribe(value => {
-            settings = value;
-            if (value.defaultCurrency) {
-                selectedCurrency = value.defaultCurrency;
-            }
-        });
-        return unsubscribe;
+        selectedCurrency = settingsStore.defaultCurrency;
     });
 
-    // Subscribe to exchange rates store
+    // Fetch exchange rates on mount and subscribe to updates
     $effect(() => {
+        fetchExchangeRates();
         const unsubscribe = exchangeRates.subscribe(value => {
             rates = value;
         });
@@ -524,8 +511,8 @@
 
     // Period info text
     let periodInfoText = $derived(() => {
-        if (settings.useCustomPeriod) {
-            return `Using custom pay period: ${settings.periodStartDay}th of previous month to ${settings.periodEndDay}th of current month`;
+        if (settingsStore.useCustomPeriod) {
+            return `Using custom pay period: ${settingsStore.periodStartDay}th of previous month to ${settingsStore.periodEndDay}th of current month`;
         }
         return 'Using standard period: 1st to last day of each month';
     });
@@ -762,7 +749,7 @@
             </div>
             <div>
                 <h3 class="font-semibold">Monthly Breakdown</h3>
-                {#if settings.useCustomPeriod}
+                {#if settingsStore.useCustomPeriod}
                     <p class="text-xs text-zinc-500">Hours calculated using custom pay period</p>
                 {:else}
                     <p class="text-xs text-zinc-500">Detailed view of earnings per month</p>
@@ -783,7 +770,7 @@
                         <tr class="border-b border-zinc-500/25">
                             <th class="text-left px-5 py-3 text-sm font-medium text-zinc-500">Month</th>
                             <th class="text-left px-5 py-3 text-sm font-medium text-zinc-500">Position</th>
-                            {#if settings.useCustomPeriod}
+                            {#if settingsStore.useCustomPeriod}
                                 <th class="text-left px-5 py-3 text-sm font-medium text-zinc-500">Pay Period</th>
                             {/if}
                             <th class="text-right px-5 py-3 text-sm font-medium text-zinc-500">Hours</th>
@@ -825,7 +812,7 @@
                                         <span class="text-sm text-zinc-400">—</span>
                                     {/if}
                                 </td>
-                                {#if settings.useCustomPeriod}
+                                {#if settingsStore.useCustomPeriod}
                                     <td class="px-5 py-3 text-sm text-zinc-500">{formatPayPeriod(item.year, item.monthIndex, { showYear: false })}</td>
                                 {/if}
                                 <td class="px-5 py-3 text-sm text-right">{formatHours(item.hours)}</td>

@@ -85,6 +85,10 @@ function createWorkLogsStore() {
             }
         },
 
+        setData(rows) {
+            workLogs = rows.map(r => new WorkLog(r));
+        },
+
         getByDate(date) {
             return workLogs.find(w => w.date === date);
         },

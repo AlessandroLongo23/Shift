@@ -95,6 +95,10 @@ function createPositionsStore() {
             }
         },
 
+        setData(rows) {
+            positions = rows.map(r => new Position(r));
+        },
+
         getById(id) {
             return positions.find(p => p.id === id);
         },

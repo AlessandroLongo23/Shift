@@ -79,6 +79,19 @@ export function formatTime(time) {
 }
 
 /**
+ * Format a Date object as a local "YYYY-MM-DD" string without UTC conversion.
+ * Using toISOString() on local-midnight dates shifts to the previous day in UTC+ timezones.
+ * @param {Date} date
+ * @returns {string} e.g. "2025-07-01"
+ */
+export function toLocalDateString(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+/**
  * Calculate years of experience from positions
  * @param {Array} positions - Array of position objects
  * @returns {number} Total years of experience

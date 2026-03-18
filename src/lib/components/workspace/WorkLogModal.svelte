@@ -1,6 +1,7 @@
 <script>
     import { workLogsStore } from '$lib/stores/workLogs.svelte.js';
-    import { formatDate, formatHours } from '$lib/utils/format.js';
+    import { settingsStore } from '$lib/stores/settings.svelte.js';
+    import { formatDate, formatHours, toLocalDateString } from '$lib/utils/format.js';
     import { moodsOptions } from '$lib/const/moods';
 	import { WorkLogType, workLogTypeOptions } from '$lib/const/workLogTypes';
 
@@ -17,6 +18,51 @@
 
     let loading = $state(false);
     let error = $state('');
+
+    // Repeat shift state (only for new logs)
+    let repeat = $state(false);
+    let repeatDays = $state(new Set());
+
+    // Day labels in order, respecting weekStartsOnMonday
+    // Each entry: { label, dow } where dow is JS getDay() value (0=Sun...6=Sat)
+    let weekdayOptions = $derived.by(() => {
+        const all = [
+            { label: 'Sun', dow: 0 },
+            { label: 'Mon', dow: 1 },
+            { label: 'Tue', dow: 2 },
+            { label: 'Wed', dow: 3 },
+            { label: 'Thu', dow: 4 },
+            { label: 'Fri', dow: 5 },
+            { label: 'Sat', dow: 6 },
+        ];
+        return settingsStore.weekStartsOnMonday
+            ? [...all.slice(1), all[0]]
+            : all;
+    });
+
+    // All dates to create when repeat is on.
+    // Includes the originally clicked date always, plus all matching weekday dates in the period
+    // that don't already have a log.
+    let repeatTargets = $derived.by(() => {
+        if (!repeat || !date || repeatDays.size === 0) return [];
+        const [y, m, d] = date.split('-').map(Number);
+        const { startDate, endDate } = settingsStore.getPayPeriod(y, m - 1);
+        const targets = [];
+        let cursor = new Date(startDate);
+        while (cursor <= endDate) {
+            const dow = cursor.getDay();
+            const ds = toLocalDateString(cursor);
+            if (repeatDays.has(dow) && !workLogsStore.getByDate(ds)) {
+                targets.push(ds);
+            }
+            cursor.setDate(cursor.getDate() + 1);
+        }
+        // Always include the clicked date (it has no log since existingLog is null here)
+        if (!targets.includes(date)) {
+            targets.unshift(date);
+        }
+        return targets;
+    });
 
     let form = $state({
         position_id: '',
@@ -60,6 +106,8 @@
                     notes: existingLog.notes || '',
                     mood_rating: existingLog.mood_rating || 3
                 };
+                repeat = false;
+                repeatDays = new Set();
             } else {
                 // Default to current position
                 const currentPos = positions.find(p => p.isCurrent());
@@ -72,6 +120,15 @@
                     notes: '',
                     mood_rating: 3
                 };
+                // Pre-select the weekday of the chosen date
+                repeat = false;
+                if (date) {
+                    const [y, m, d] = date.split('-').map(Number);
+                    const dow = new Date(y, m - 1, d).getDay();
+                    repeatDays = new Set([dow]);
+                } else {
+                    repeatDays = new Set();
+                }
             }
         }
     });
@@ -83,9 +140,8 @@
         loading = true;
         error = '';
 
-        const data = {
+        const baseData = {
             position_id: form.position_id,
-            date: date,
             check_in: form.type === WorkLogType.WORK ? form.check_in : null,
             check_out: form.type === WorkLogType.WORK ? form.check_out : null,
             break_minutes: form.type === WorkLogType.WORK ? parseInt(form.break_minutes) || 0 : 0,
@@ -96,17 +152,32 @@
         };
 
         try {
-            let result;
             if (existingLog) {
-                result = await workLogsStore.update(existingLog.id, data);
+                const result = await workLogsStore.update(existingLog.id, { ...baseData, date });
+                if (result.success) {
+                    isOpen = false;
+                } else {
+                    error = result.error;
+                }
+            } else if (repeat && repeatTargets.length > 0) {
+                // Bulk create: repeatTargets already includes the clicked date + all matching weekday dates
+                let lastError = '';
+                for (const d of repeatTargets) {
+                    const result = await workLogsStore.create({ ...baseData, date: d });
+                    if (!result.success) lastError = result.error;
+                }
+                if (lastError) {
+                    error = lastError;
+                } else {
+                    isOpen = false;
+                }
             } else {
-                result = await workLogsStore.create(data);
-            }
-
-            if (result.success) {
-                isOpen = false;
-            } else {
-                error = result.error;
+                const result = await workLogsStore.create({ ...baseData, date });
+                if (result.success) {
+                    isOpen = false;
+                } else {
+                    error = result.error;
+                }
             }
         } catch (err) {
             error = err.message;
@@ -227,7 +298,7 @@
                         type="button"
                         onclick={() => form.mood_rating = mood.value}
                         class="
-                            flex-1 py-3 rounded-lg text-2xl transition-all
+                            flex-1 py-3 rounded-lg text-2xl transition-colors
                             {form.mood_rating === mood.value
                                 ? 'bg-zinc-100 dark:bg-zinc-800 ring-2 ring-zinc-400 dark:ring-zinc-600' 
                                 : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'}
@@ -252,6 +323,55 @@
             ></textarea>
         </div>
 
+        {#if !existingLog}
+            <div class="space-y-3 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <div class="relative">
+                        <input
+                            type="checkbox"
+                            bind:checked={repeat}
+                            class="sr-only peer"
+                        />
+                        <div class="w-9 h-5 rounded-full bg-zinc-200 dark:bg-zinc-700 peer-checked:bg-zinc-800 dark:peer-checked:bg-zinc-300 transition-colors"></div>
+                        <div class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4"></div>
+                    </div>
+                    <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Repeat this shift in the pay period</span>
+                </label>
+
+                {#if repeat}
+                    <div class="space-y-2">
+                        <div class="flex gap-1.5 flex-wrap">
+                            {#each weekdayOptions as opt}
+                                <button
+                                    type="button"
+                                    onclick={() => {
+                                        const next = new Set(repeatDays);
+                                        next.has(opt.dow) ? next.delete(opt.dow) : next.add(opt.dow);
+                                        repeatDays = next;
+                                    }}
+                                    class="
+                                        px-3 py-1.5 rounded-md text-xs font-medium transition-colors
+                                        {repeatDays.has(opt.dow)
+                                            ? 'bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900'
+                                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'}
+                                    "
+                                >
+                                    {opt.label}
+                                </button>
+                            {/each}
+                        </div>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                            {#if repeatDays.size === 0}
+                                Select at least one day to repeat.
+                            {:else}
+                                {repeatTargets.length} shift{repeatTargets.length === 1 ? '' : 's'} will be created (days with existing logs are skipped).
+                            {/if}
+                        </p>
+                    </div>
+                {/if}
+            </div>
+        {/if}
+
         <div class="flex gap-3 pt-4">
             {#if existingLog}
                 <Button type="button" variant="danger" onclick={handleDelete} disabled={loading}>
@@ -263,7 +383,7 @@
                 Cancel
             </Button>
             <Button type="submit" {loading}>
-                {existingLog ? 'Save Changes' : 'Log Shift'}
+                {existingLog ? 'Save Changes' : (repeat && repeatTargets.length > 0 ? `Create ${repeatTargets.length} Shift${repeatTargets.length === 1 ? '' : 's'}` : 'Log Shift')}
             </Button>
         </div>
     </form>

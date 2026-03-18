@@ -1,13 +1,12 @@
 <script>
-    import { onMount } from 'svelte';
     import { workLogsStore } from '$lib/stores/workLogs.svelte.js';
     import { positionsStore } from '$lib/stores/positions.svelte.js';
     import { paychecksStore } from '$lib/stores/paychecks.svelte.js';
-    import { settingsStore } from '$lib/stores/settings.js';
+    import { settingsStore } from '$lib/stores/settings.svelte.js';
     import { currencyList } from '$lib/stores/currency.js';
     import { exchangeRates, fetchExchangeRates, convertCurrency } from '$lib/stores/exchangeRates.js';
-    import { formatCurrency, formatHours, formatTime } from '$lib/utils/format.js';
-    import { getPayPeriod, getPeriodStats, formatPayPeriod } from '$lib/utils/period.js';
+    import { formatCurrency, formatHours, formatTime, toLocalDateString } from '$lib/utils/format.js';
+    import { getPeriodStats, formatPayPeriod } from '$lib/utils/period.js';
     import { WorkLogTypeColors, WorkLogTypeMap } from '$lib/const/workLogTypes';
     import { ChevronLeft, ChevronRight, Clock, Calendar, Banknote, Plus, Building2, Pencil } from 'lucide-svelte';
     import { Currency } from '$lib/const/currency';
@@ -18,6 +17,14 @@
     import PaycheckModal from '$lib/components/workspace/PaycheckModal.svelte';
 
 
+    let { data } = $props();
+
+    $effect.pre(() => {
+        positionsStore.setData(data.positions);
+        paychecksStore.setData(data.paychecks);
+        workLogsStore.setData(data.workLogs);
+    });
+
     let currentDate = $state(new Date());
     let selectedDate = $state(null);
     let isWorkLogModalOpen = $state(false);
@@ -26,42 +33,20 @@
     let selectedCurrency = $state(Currency.EURO);
     let rates = $state({});
     let loadingRates = $state(false);
-    let settings = $state({
-        weekStartsOnMonday: true,
-        useCustomPeriod: false,
-        periodStartDay: 16,
-        periodEndDay: 15,
-        defaultCurrency: Currency.EURO
-    });
-
     // Reference month (the paycheck month we're viewing)
     let year = $derived(currentDate.getFullYear());
     let month = $derived(currentDate.getMonth());
-    
+
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-    onMount(async () => {
-        positionsStore.fetch();
-        paychecksStore.fetch();
-        workLogsStore.fetch(); // Fetch all logs
-        
-        // Fetch exchange rates
-        loadingRates = true;
-        rates = await fetchExchangeRates();
-        loadingRates = false;
+    // Sync default currency from settings
+    $effect(() => {
+        selectedCurrency = settingsStore.defaultCurrency;
     });
 
-    // Subscribe to settings store
+    // Fetch exchange rates on mount and subscribe to updates
     $effect(() => {
-        const unsubscribe = settingsStore.subscribe(value => {
-            settings = value;
-            selectedCurrency = value.defaultCurrency || Currency.EURO;
-        });
-        return unsubscribe;
-    });
-
-    // Subscribe to exchange rates store
-    $effect(() => {
+        fetchExchangeRates();
         const unsubscribe = exchangeRates.subscribe(value => {
             rates = value;
         });
@@ -98,9 +83,9 @@
         return convertCurrency(amount, fromCurrency, selectedCurrency, rates);
     }
 
-    // Get pay period for current month (using centralized utility)
+    // Get pay period for current month
     let payPeriod = $derived(() => {
-        return getPayPeriod(year, month);
+        return settingsStore.getPayPeriod(year, month);
     });
 
     // Get weekday names based on settings
@@ -117,7 +102,7 @@
         let dayOfWeek = firstDayOfWeek.getDay(); // 0 = Sunday
         
         // Adjust for Monday start
-        if (settings.weekStartsOnMonday) {
+        if (settingsStore.weekStartsOnMonday) {
             dayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         }
         
@@ -129,7 +114,7 @@
         let endDayOfWeek = lastDayOfWeek.getDay();
         
         // Adjust for Monday start
-        if (settings.weekStartsOnMonday) {
+        if (settingsStore.weekStartsOnMonday) {
             endDayOfWeek = endDayOfWeek === 0 ? 6 : endDayOfWeek - 1;
         }
         
@@ -152,12 +137,12 @@
     });
 
     function getLogForDate(date) {
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(date);
         return workLogsStore.workLogs.find(log => log.date === dateStr);
     }
 
     function handleDayClick(day) {
-        selectedDate = day.date.toISOString().split('T')[0];
+        selectedDate = toLocalDateString(day.date);
         isWorkLogModalOpen = true;
     }
 
@@ -266,7 +251,7 @@
         </div>
         <div class="text-right">
             <h2 class="text-xl font-semibold">{monthNames[month]} {year}</h2>
-            {#if settings.useCustomPeriod}
+            {#if settingsStore.useCustomPeriod}
                 <p class="text-sm text-zinc-500">{payPeriodLabel()}</p>
             {/if}
         </div>

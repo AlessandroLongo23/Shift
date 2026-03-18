@@ -42,7 +42,7 @@
 
 {#if visible}
     <div 
-        class="{tooltipStyles.translate} {classes} absolute flex flex-col z-50 bg-white dark:bg-zinc-900 min-w-52 border border-zinc-500/25 rounded-lg shadow-md transform transition-all duration-100 pointer-events-none"
+        class="{tooltipStyles.translate} {classes} absolute flex flex-col z-50 bg-white dark:bg-zinc-900 min-w-52 border border-zinc-500/25 rounded-lg shadow-md transition-transform duration-100 pointer-events-none"
         style={tooltipStyles.style}
     >
         {@render children()}

@@ -91,6 +91,10 @@ function createPaychecksStore() {
             }
         },
 
+        setData(rows) {
+            paychecks = rows.map(r => new Paycheck(r));
+        },
+
         getById(id) {
             return paychecks.find(p => p.id === id);
         },

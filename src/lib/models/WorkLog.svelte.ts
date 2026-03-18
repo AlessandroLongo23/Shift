@@ -1,7 +1,5 @@
-import { Clock, Calendar, Smile, FileText } from 'lucide-svelte';
-import { formatDate, formatHours } from '$lib/utils/format.js';
 import { moodsOptions } from '$lib/const/moods';
-import { WorkLogType, WorkLogTypeColors, WorkLogTypeMap } from '$lib/const/workLogTypes';
+import { WorkLogType } from '$lib/const/workLogTypes';
 
 export class WorkLog {
     id: string;
@@ -53,39 +51,4 @@ export class WorkLog {
         return `${this.check_in} - ${this.check_out}`;
     }
 
-    public static dataColumns: any[] = [
-        {
-            label: 'Date',
-            key: 'date',
-            sortable: true,
-            icon: Calendar,
-            display: (log: WorkLog) => formatDate(log.date, 'full')
-        },
-        {
-            label: 'Hours',
-            key: 'hours_worked',
-            sortable: true,
-            icon: Clock,
-            display: (log: WorkLog) => formatHours(log.hours_worked)
-        },
-        {
-            label: 'Type',
-            key: 'type',
-            sortable: true,
-            icon: FileText,
-            display: (log: WorkLog) => {
-                return `<span class="inline-flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full ${WorkLogTypeColors[log.type]}"></span>
-                    ${WorkLogTypeMap[log.type]}
-                </span>`;
-            }
-        },
-        {
-            label: 'Mood',
-            key: 'mood_rating',
-            sortable: true,
-            icon: Smile,
-            display: (log: WorkLog) => log.getMoodEmoji()
-        }
-    ];
 }

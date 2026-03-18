@@ -1,5 +1,4 @@
 <script>
-    import { onMount } from 'svelte';
     import { positionsStore } from '$lib/stores/positions.svelte.js';
     import { paychecksStore } from '$lib/stores/paychecks.svelte.js';
     import { companiesStore } from '$lib/stores/companies.svelte.js';
@@ -15,6 +14,14 @@
     import PositionModal from '$lib/components/timeline/PositionModal.svelte';
     import CompanyModal from '$lib/components/timeline/CompanyModal.svelte';
 
+    let { data } = $props();
+
+    $effect.pre(() => {
+        companiesStore.setData(data.companies);
+        positionsStore.setData(data.positions);
+        paychecksStore.setData(data.paychecks);
+    });
+
     let isPositionModalOpen = $state(false);
     let isCompanyModalOpen = $state(false);
     let editingPosition = $state(null);
@@ -22,19 +29,9 @@
     let rates = $state({});
     let loadingRates = $state(false);
 
-    onMount(async () => {
-        positionsStore.fetch();
-        paychecksStore.fetch();
-        companiesStore.fetch();
-        
-        // Fetch exchange rates
-        loadingRates = true;
-        rates = await fetchExchangeRates();
-        loadingRates = false;
-    });
-
-    // Subscribe to exchange rates store
+    // Fetch exchange rates on mount and subscribe to updates
     $effect(() => {
+        fetchExchangeRates();
         const unsubscribe = exchangeRates.subscribe(value => {
             rates = value;
         });

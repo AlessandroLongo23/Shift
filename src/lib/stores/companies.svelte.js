@@ -81,6 +81,10 @@ function createCompaniesStore() {
             }
         },
 
+        setData(rows) {
+            companies = rows.map(r => new Company(r));
+        },
+
         getById(id) {
             return companies.find(c => c.id === id);
         }

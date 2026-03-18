@@ -1,19 +1,20 @@
 <script>
-    import { onMount } from 'svelte';
     import { companiesStore } from '$lib/stores/companies.svelte.js';
     import { positionsStore } from '$lib/stores/positions.svelte.js';
     import { Building2, Globe, Plus, ExternalLink, Briefcase } from 'lucide-svelte';
-    
+
     import Button from '$lib/components/ui/Button.svelte';
     import CompanyModal from '$lib/components/timeline/CompanyModal.svelte';
 
+    let { data } = $props();
+
+    $effect.pre(() => {
+        companiesStore.setData(data.companies);
+        positionsStore.setData(data.positions);
+    });
+
     let isModalOpen = $state(false);
     let editingCompany = $state(null);
-
-    onMount(() => {
-        companiesStore.fetch();
-        positionsStore.fetch();
-    });
 
     function handleAddCompany() {
         editingCompany = null;

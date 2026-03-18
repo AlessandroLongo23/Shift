@@ -1,29 +1,17 @@
 <script>
-    import { settingsStore } from '$lib/stores/settings.js';
+    import { settingsStore } from '$lib/stores/settings.svelte.js';
     import { currencyList } from '$lib/stores/currency.js';
     import { Currency } from '$lib/const/currency';
     import { Settings, Calendar, Banknote, RotateCcw } from 'lucide-svelte';
 
     import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 
-    // Local state bound to the store
-    let weekStartsOnMonday = $state(true);
-    let useCustomPeriod = $state(false);
-    let periodStartDay = $state('16');
-    let periodEndDay = $state('15');
-    let defaultCurrency = $state(Currency.EURO);
-
-    // Sync with store on mount
-    $effect(() => {
-        const unsubscribe = settingsStore.subscribe(settings => {
-            weekStartsOnMonday = settings.weekStartsOnMonday;
-            useCustomPeriod = settings.useCustomPeriod;
-            periodStartDay = settings.periodStartDay.toString();
-            periodEndDay = settings.periodEndDay.toString();
-            defaultCurrency = settings.defaultCurrency;
-        });
-        return unsubscribe;
-    });
+    // Local state initialized from store
+    let weekStartsOnMonday = $state(settingsStore.weekStartsOnMonday);
+    let useCustomPeriod = $state(settingsStore.useCustomPeriod);
+    let periodStartDay = $state(settingsStore.periodStartDay.toString());
+    let periodEndDay = $state(settingsStore.periodEndDay.toString());
+    let defaultCurrency = $state(settingsStore.defaultCurrency);
 
     function saveWeekStart(value) {
         weekStartsOnMonday = value;
@@ -148,7 +136,7 @@
     </div>
 
     <!-- Pay Period Settings -->
-    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25 overflow-hidden">
+    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25">
         <div class="px-6 py-4 border-b border-zinc-500/25 flex items-center gap-3">
             <Banknote class="w-5 h-5 text-zinc-500" />
             <h2 class="font-semibold">Pay Period</h2>
@@ -246,7 +234,7 @@
     </div>
 
     <!-- Display Settings -->
-    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25 overflow-hidden">
+    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-500/25">
         <div class="px-6 py-4 border-b border-zinc-500/25 flex items-center gap-3">
             <Settings class="w-5 h-5 text-zinc-500" />
             <h2 class="font-semibold">Display</h2>

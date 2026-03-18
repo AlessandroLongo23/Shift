@@ -1,17 +1,7 @@
-import { settingsStore } from '$lib/stores/settings.js';
+import { settingsStore } from '$lib/stores/settings.svelte.js';
 import { Currency } from '$lib/const/currency';
 import { WorkLogType } from '$lib/const/workLogTypes';
 import { Paycheck } from '$lib/models/Paycheck.svelte';
-
-/**
- * Get the pay period for a given year and month
- * @param {number} year - The year
- * @param {number} month - The month (0-indexed)
- * @returns {{ startDate: Date, endDate: Date }}
- */
-export function getPayPeriod(year, month) {
-    return settingsStore.getPayPeriod(year, month);
-}
 
 /**
  * Filter work logs that fall within a specific pay period
@@ -23,7 +13,7 @@ export function getPayPeriod(year, month) {
  * @returns {Array<WorkLog>} Filtered work logs
  */
 export function getLogsInPayPeriod(workLogs, year, month, options = {}) {
-    const { startDate, endDate } = getPayPeriod(year, month);
+    const { startDate, endDate } = settingsStore.getPayPeriod(year, month);
     
     // Normalize dates for comparison
     const start = new Date(startDate);
@@ -132,7 +122,7 @@ export function calculatePaycheckHourlyRate(paycheck, workLogs, currencyConverte
  * @returns {string} Formatted period string
  */
 export function formatPayPeriod(year, month, options = {}) {
-    const { startDate, endDate } = getPayPeriod(year, month);
+    const { startDate, endDate } = settingsStore.getPayPeriod(year, month);
     const formatOpts = { 
         month: options.monthFormat || 'short', 
         day: 'numeric', 
@@ -145,13 +135,3 @@ export function formatPayPeriod(year, month, options = {}) {
     return `${startStr} - ${endStr}`;
 }
 
-/**
- * Check if a date falls within a pay period
- * @param {Date|string} date - The date to check
- * @param {number} year - The reference year
- * @param {number} month - The reference month (0-indexed)
- * @returns {boolean}
- */
-export function isDateInPayPeriod(date, year, month) {
-    return settingsStore.isInPayPeriod(date, year, month);
-}
