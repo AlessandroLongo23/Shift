@@ -53,7 +53,7 @@ export async function POST({ request, locals: { supabase } }) {
                 hours_worked: workLog.hours_worked || 0,
                 type: workLog.type || WorkLogType.WORK,
                 notes: workLog.notes || null,
-                mood_rating: workLog.mood_rating || null
+                mood_rating: null
             })
             .select()
             .single();

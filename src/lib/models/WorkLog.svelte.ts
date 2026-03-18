@@ -1,4 +1,3 @@
-import { moodsOptions } from '$lib/const/moods';
 import { WorkLogType } from '$lib/const/workLogTypes';
 
 export class WorkLog {
@@ -12,7 +11,6 @@ export class WorkLog {
     hours_worked: number;
     type: WorkLogType;
     notes: string | null;
-    mood_rating: number | null;
     created_at: string;
 
     constructor(workLog: any) {
@@ -27,7 +25,6 @@ export class WorkLog {
         this.hours_worked = workLog.hours_worked || this.calculateHoursWorked();
         this.type = workLog.type || WorkLogType.WORK;
         this.notes = workLog.notes;
-        this.mood_rating = workLog.mood_rating;
         this.created_at = workLog.created_at;
     }
 
@@ -39,11 +36,6 @@ export class WorkLog {
         
         const totalMinutes = (outHours * 60 + outMinutes) - (inHours * 60 + inMinutes) - this.break_minutes;
         return Math.max(0, totalMinutes / 60);
-    }
-
-    public getMoodEmoji(): string {
-        const moods = moodsOptions;
-        return this.mood_rating ? moods.find(m => m.value === this.mood_rating)?.emoji || '—' : '—';
     }
 
     public getTimeRange(): string {

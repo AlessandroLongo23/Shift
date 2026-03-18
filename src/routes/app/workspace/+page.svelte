@@ -25,7 +25,21 @@
         workLogsStore.setData(data.workLogs);
     });
 
-    let currentDate = $state(new Date());
+    // Find the period reference date that contains today.
+    // With a custom period (e.g. 16th–15th), today's date might belong to the *next*
+    // calendar month's period (e.g. Mar 18 belongs to the Apr period Mar16–Apr15).
+    function getPeriodDateForToday() {
+        const today = new Date();
+        if (!settingsStore.useCustomPeriod) return today;
+        // If today's day-of-month is >= the period start day, it's already past the
+        // cutoff and belongs to the following month's period.
+        if (today.getDate() >= settingsStore.periodStartDay) {
+            return new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        }
+        return today;
+    }
+
+    let currentDate = $state(getPeriodDateForToday());
     let selectedDate = $state(null);
     let isWorkLogModalOpen = $state(false);
     let isPaycheckModalOpen = $state(false);
@@ -62,7 +76,7 @@
     }
 
     function goToToday() {
-        currentDate = new Date();
+        currentDate = getPeriodDateForToday();
     }
 
     // Get position for a paycheck
@@ -275,10 +289,12 @@
                         type="button"
                         onclick={() => handleDayClick(day)}
                         class="
-                            relative h-20 sm:h-24 p-2 border-r border-b border-zinc-500/15 
-                            text-left transition-colors
-                            {day.isInPeriod 
-                                ? 'hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer' 
+                            relative h-20 sm:h-24 p-2 border-r border-b border-zinc-500/15
+                            text-left transition-colors flex flex-col justify-start items-start
+                            {day.isInPeriod
+                                ? (day.date.getDay() === 0 || day.date.getDay() === 6
+                                    ? 'bg-zinc-50 dark:bg-zinc-800/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer'
+                                    : 'hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer')
                                 : 'bg-zinc-100 dark:bg-zinc-800/50 cursor-pointer'}
                             {(i + 1) % 7 === 0 ? 'border-r-0' : ''}
                         "
@@ -299,9 +315,6 @@
                                 </div>
                                 {#if log.check_in && log.check_out}
                                     <span class="text-[10px] text-zinc-400 hidden sm:block">{formatTime(log.check_in)}-{formatTime(log.check_out)}</span>
-                                {/if}
-                                {#if log.mood_rating}
-                                    <span class="text-xs">{log.getMoodEmoji()}</span>
                                 {/if}
                             </div>
                         {/if}

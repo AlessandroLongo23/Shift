@@ -2,7 +2,6 @@
     import { workLogsStore } from '$lib/stores/workLogs.svelte.js';
     import { settingsStore } from '$lib/stores/settings.svelte.js';
     import { formatDate, formatHours, toLocalDateString } from '$lib/utils/format.js';
-    import { moodsOptions } from '$lib/const/moods';
 	import { WorkLogType, workLogTypeOptions } from '$lib/const/workLogTypes';
 
     import Modal from '$lib/components/ui/Modal.svelte';
@@ -70,8 +69,7 @@
         check_out: '17:00',
         break_minutes: '30',
         type: WorkLogType.WORK,
-        notes: '',
-        mood_rating: 3
+        notes: ''
     });
 
     // Transform positions for CustomSelect
@@ -103,8 +101,7 @@
                     check_out: existingLog.check_out || '18:00',
                     break_minutes: existingLog.break_minutes?.toString() || '30',
                     type: existingLog.type || WorkLogType.WORK,
-                    notes: existingLog.notes || '',
-                    mood_rating: existingLog.mood_rating || 3
+                    notes: existingLog.notes || ''
                 };
                 repeat = false;
                 repeatDays = new Set();
@@ -117,8 +114,7 @@
                     check_out: '17:00',
                     break_minutes: '30',
                     type: WorkLogType.WORK,
-                    notes: '',
-                    mood_rating: 3
+                    notes: ''
                 };
                 // Pre-select the weekday of the chosen date
                 repeat = false;
@@ -147,8 +143,7 @@
             break_minutes: form.type === WorkLogType.WORK ? parseInt(form.break_minutes) || 0 : 0,
             hours_worked: form.type === WorkLogType.WORK ? calculatedHours : 0,
             type: form.type,
-            notes: form.notes || null,
-            mood_rating: form.mood_rating
+            notes: form.notes || null
         };
 
         try {
@@ -287,28 +282,6 @@
                 </div>
             </div>
         {/if}
-
-        <div class="space-y-1.5">
-            <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Mood
-            </label>
-            <div class="flex gap-2">
-                {#each moodsOptions as mood}
-                    <button
-                        type="button"
-                        onclick={() => form.mood_rating = mood.value}
-                        class="
-                            flex-1 py-3 rounded-lg text-2xl transition-colors
-                            {form.mood_rating === mood.value
-                                ? 'bg-zinc-100 dark:bg-zinc-800 ring-2 ring-zinc-400 dark:ring-zinc-600' 
-                                : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'}
-                        " title={mood.label}
-                    >
-                        {mood.emoji}
-                    </button>
-                {/each}
-            </div>
-        </div>
 
         <div class="space-y-1.5">
             <label for="notes" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">

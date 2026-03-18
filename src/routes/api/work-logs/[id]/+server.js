@@ -40,7 +40,7 @@ export async function PUT({ params, request, locals: { supabase } }) {
                 hours_worked: workLog.hours_worked,
                 type: workLog.type,
                 notes: workLog.notes,
-                mood_rating: workLog.mood_rating
+                mood_rating: null
             })
             .eq('id', params.id)
             .eq('user_id', user.id)
