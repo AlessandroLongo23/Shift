@@ -15,14 +15,18 @@
     import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
     import WorkLogModal from '$lib/components/workspace/WorkLogModal.svelte';
     import PaycheckModal from '$lib/components/workspace/PaycheckModal.svelte';
+    import WorkspaceSkeleton from '$lib/components/skeletons/WorkspaceSkeleton.svelte';
 
 
     let { data } = $props();
 
     $effect.pre(() => {
         positionsStore.setData(data.positions);
-        paychecksStore.setData(data.paychecks);
-        workLogsStore.setData(data.workLogs);
+    });
+
+    $effect(() => {
+        data.workLogs.then(rows => workLogsStore.setData(rows));
+        data.paychecks.then(rows => paychecksStore.setData(rows));
     });
 
     // Find the period reference date that contains today.
@@ -230,6 +234,10 @@
     {month}
     existingPaycheck={editingPaycheck}
 />
+
+{#await Promise.all([data.workLogs, data.paychecks])}
+    <WorkspaceSkeleton />
+{:then}
 
 <div class="max-w-6xl mx-auto space-y-6">
     <!-- Header -->
@@ -462,3 +470,9 @@
         </div>
     </div>
 </div>
+
+{:catch}
+    <div class="max-w-6xl mx-auto">
+        <p class="text-red-500 text-sm">Failed to load workspace data. Please refresh.</p>
+    </div>
+{/await}

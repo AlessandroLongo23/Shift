@@ -16,6 +16,7 @@
 
     import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
     import ChartTooltip from '$lib/components/ui/ChartTooltip.svelte';
+    import AnalyticsSkeleton from '$lib/components/skeletons/AnalyticsSkeleton.svelte';
 
     /** @typedef {{ year: string, value: number, color: string }} TooltipItem */
     /** @typedef {{ title: string, items: TooltipItem[], x: number, y: number }} TooltipData */
@@ -24,8 +25,11 @@
 
     $effect.pre(() => {
         positionsStore.setData(data.positions);
-        paychecksStore.setData(data.paychecks);
-        workLogsStore.setData(data.workLogs);
+    });
+
+    $effect(() => {
+        data.paychecks.then(rows => paychecksStore.setData(rows));
+        data.workLogs.then(rows => workLogsStore.setData(rows));
     });
 
     let selectedCurrency = $state(Currency.EURO);
@@ -545,6 +549,10 @@
     <title>Analytics | Shift</title>
 </svelte:head>
 
+{#await Promise.all([data.paychecks, data.workLogs])}
+    <AnalyticsSkeleton />
+{:then}
+
 <div class="max-w-6xl mx-auto space-y-8">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -873,3 +881,9 @@
         {/if}
     </div>
 </div>
+
+{:catch}
+    <div class="max-w-6xl mx-auto">
+        <p class="text-red-500 text-sm">Failed to load analytics data. Please refresh.</p>
+    </div>
+{/await}
